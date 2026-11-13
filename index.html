@@ -43,6 +43,13 @@ canvas{width:100%;height:auto;display:block;touch-action:none;cursor:crosshair;b
 .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);margin:8px 4px 0}
 .sw{display:inline-block;width:14px;height:4px;border-radius:2px;vertical-align:middle;margin-right:6px}
 .small{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.45}
+.figs{margin-top:18px}
+.figs h2{font-size:20px;margin:0 0 4px}
+.figgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:12px}
+.figgrid figure{margin:0;background:#fff;border-radius:14px;padding:12px;box-shadow:0 2px 10px rgba(15,27,45,.08)}
+.figgrid img{width:100%;height:auto;display:block;border-radius:8px}
+.figgrid figcaption{font-size:14px;color:var(--muted);margin-top:8px;line-height:1.45}
+.figgrid figcaption b{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -105,6 +112,18 @@ canvas{width:100%;height:auto;display:block;touch-action:none;cursor:crosshair;b
     </div>
   </div>
 </div>
+<section class="figs" aria-labelledby="figs-title">
+  <h2 id="figs-title">Gráficas del ejercicio</h2>
+  <p class="sub">Hechas con Python y Matplotlib. Dominio de la gráfica: [−2, 2] × [−2, 2].</p>
+  <div class="figgrid">
+    <figure><img src="fig1_gradiente_F.png" alt="Campo F = ∇f con las curvas de nivel de f, la curva f = 0 y el vector F(1,1) perpendicular a la recta y = x">
+      <figcaption><b>Inciso (b).</b> F = ∇f = ⟨2xy, x² − 3y²⟩ con las curvas de nivel de f. Las líneas negras son f = 0; la flecha naranja F(1,1) = ⟨2, −2⟩ es perpendicular a la recta y = x.</figcaption></figure>
+    <figure><img src="fig2_campo_G.png" alt="Campo G = ⟨−y, x⟩ girando en sentido antihorario alrededor del origen">
+      <figcaption><b>Inciso (c).</b> G = ⟨−y, x⟩ gira en sentido antihorario y su tamaño es r. No es un gradiente: ∂P/∂y = −1 ≠ 1 = ∂Q/∂x.</figcaption></figure>
+    <figure><img src="fig3_circulacion.png" alt="Circulación de F y de G sobre la circunferencia unitaria">
+      <figcaption><b>Inciso (d).</b> Trabajo en la circunferencia x² + y² = 1: 0 para F (conservativo) y 2π para G (no conservativo).</figcaption></figure>
+  </div>
+</section>
 </div>
 <script>
 (function(){
