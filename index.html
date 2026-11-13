@@ -41,6 +41,11 @@ canvas{width:100%;height:auto;display:block;touch-action:none;border-radius:8px}
 .steps{margin:0;padding-left:20px;font-size:15px;line-height:1.55}
 .steps li{margin-bottom:4px}
 .hide{display:none}
+.inp label{display:block;font-size:13px;color:var(--muted);margin:8px 0 4px}
+.inp input{font:17px 'STIX Two Text',serif;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;width:100%}
+.err{color:var(--orange);font-size:13px;min-height:16px;margin-top:6px}
+.chk{display:flex;gap:10px;align-items:center;min-height:36px;font-size:15px;cursor:pointer}
+.chk input{width:20px;height:20px}
 </style>
 </head>
 <body>
@@ -54,6 +59,7 @@ canvas{width:100%;height:auto;display:block;touch-action:none;border-radius:8px}
   <button id="tb" aria-pressed="true">Inciso (b)<small>F = ∇f y la curva f = 0</small></button>
   <button id="tc" aria-pressed="false">Inciso (c)<small>G = ⟨−y, x⟩</small></button>
   <button id="td" aria-pressed="false">Inciso (d)<small>Conservativo vs no conservativo</small></button>
+  <button id="tp" aria-pressed="false">Personalizado<small>Escribe tu propio campo</small></button>
 </div>
 
 <div class="layout">
@@ -114,6 +120,24 @@ canvas{width:100%;height:auto;display:block;touch-action:none;border-radius:8px}
     <div class="card hide" data-show="d">
       <div class="label" id="d_lab">Trabajo</div>
       <div id="d_out"></div>
+    </div>
+    <div class="card hide inp" data-show="p">
+      <div class="label">Personalizado · tu campo F = ⟨P, Q⟩</div>
+      <label for="pP">P(x, y)</label><input id="pP" value="2*x*y" autocomplete="off">
+      <label for="pQ">Q(x, y)</label><input id="pQ" value="x^2 - 3*y^2" autocomplete="off">
+      <label for="pf">f(x, y) para curvas de nivel (opcional)</label><input id="pf" value="x^2*y - y^3" autocomplete="off">
+      <div class="err" id="perr"></div>
+      <div class="small" style="font-size:13px;color:var(--muted)">Usa ^, *, sin, cos, exp, sqrt, pi. Ejemplos: <a href="#" id="exG">G = ⟨−y, x⟩</a> · <a href="#" id="exR">⟨x, y⟩</a></div>
+    </div>
+    <div class="card hide" data-show="p">
+      <div class="label">En el punto</div>
+      <div class="row"><span>Punto</span><b class="math" id="p_pt"></b></div>
+      <div class="row"><span>Vector del campo</span><b class="math" id="p_F"></b></div>
+      <div class="row"><span>∂P/∂y</span><b class="math" id="p_py"></b></div>
+      <div class="row"><span>∂Q/∂x</span><b class="math" id="p_qx"></b></div>
+      <div class="verdict" id="p_verd"></div>
+      <label class="chk" style="margin-top:8px"><input type="checkbox" id="p_circ"> Trabajo en la circunferencia x² + y² = 1</label>
+      <div id="p_circout"></div>
     </div>
   </div>
 </div>
@@ -235,22 +259,65 @@ function drawD(){
   $('hint').textContent='Cambia entre F y G, y entre la vuelta completa y los dos caminos.';
   legend(dWhat==='circ'?[[BLUE,'flechas del campo'],[PURPLE,'circunferencia x² + y² = 1']]:[[BLUE,'flechas del campo'],[PURPLE,'camino de arriba'],[TEAL,'camino de abajo']]);
 }
-function draw(){ if(mode==='b')drawB(); else if(mode==='c')drawC(); else drawD(); }
+
+const PC={P:null,Q:null,f:null};
+function compile(src){
+  const e=src.replace(/\^/g,'**').replace(/\bsen\b/g,'sin');
+  if(/[^0-9xy+\-*\/().,\sa-z_]/i.test(e))throw new Error('carácter no válido');
+  const fn=new Function('x','y','with(Math){return ('+e+');}');
+  const t=fn(0.3,0.7); if(typeof t!=='number'||Number.isNaN(t))throw new Error('no da un número');
+  return fn;
+}
+function setCustom(){
+  try{PC.P=compile($('pP').value);PC.Q=compile($('pQ').value);PC.f=$('pf').value.trim()?compile($('pf').value):null;$('perr').textContent='';}
+  catch(e){$('perr').textContent='Revisa la expresión: '+e.message;}
+  if(mode==='p')draw();
+}
+let ppt={x:1,y:1};
+function drawP(){
+  base();
+  if(!PC.P){domainLabel();return;}
+  if(PC.f){for(let lv=-6;lv<=6;lv+=1.5){if(lv!==0)contour(PC.f,lv,'#B8C1CC',1.5,lv<0?[6,5]:[]);} contour(PC.f,0,INK,3);}
+  field(PC);
+  let out='';
+  if($('p_circ').checked){
+    const R=1/(2*L)*W;ctx.strokeStyle=PURPLE;ctx.lineWidth=4;ctx.beginPath();ctx.arc(X(0),Y(0),R,0,2*Math.PI);ctx.stroke();
+    arrow(X(Math.cos(0.6)),Y(Math.sin(0.6)),X(Math.cos(0.78)),Y(Math.sin(0.78)),PURPLE,4,18);
+    const c=lineInt(PC,t=>[Math.cos(t),Math.sin(t),-Math.sin(t),Math.cos(t)],0,2*Math.PI);
+    out=`<div class="row"><span>∮ F · dr (antihorario)</span><b class="math">${fmt(c)}</b></div>`;
+  }
+  $('p_circout').innerHTML=out;
+  const {x,y}=ppt,u=PC.P(x,y),v=PC.Q(x,y),m=Math.hypot(u,v);
+  if(m>1e-9){const k=0.6/m*Math.min(1.3,Math.max(0.6,m/2));arrow(X(x),Y(y),X(x+u*k),Y(y+v*k),ORANGE,5,20);}
+  ctx.fillStyle=ORANGE;ctx.beginPath();ctx.arc(X(x),Y(y),11,0,2*Math.PI);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.stroke();
+  domainLabel();
+  const h=1e-4,py=(PC.P(x,y+h)-PC.P(x,y-h))/(2*h),qx=(PC.Q(x+h,y)-PC.Q(x-h,y))/(2*h),same=Math.abs(py-qx)<1e-3;
+  $('p_pt').textContent=`(${fmt(x)}, ${fmt(y)})`;$('p_F').textContent=`⟨${fmt(u)}, ${fmt(v)}⟩`;
+  $('p_py').textContent=fmt(py);$('p_qx').textContent=fmt(qx);
+  $('p_verd').className='verdict '+(same?'ok':'no');
+  $('p_verd').textContent=same?'∂P/∂y = ∂Q/∂x en este punto → puede ser gradiente':'∂P/∂y ≠ ∂Q/∂x → NO es gradiente';
+  $('hint').textContent='Escribe P y Q a la derecha. Arrastra el punto naranja para ver el vector en cualquier punto.';
+  legend([[BLUE,'flechas del campo'],[ORANGE,'vector en el punto']].concat(PC.f?[[INK,'curva f = 0']]:[]).concat($('p_circ').checked?[[PURPLE,'circunferencia x² + y² = 1']]:[]));
+}
+function draw(){ if(mode==='b')drawB(); else if(mode==='c')drawC(); else if(mode==='d')drawD(); else drawP(); }
 
 let drag=false;
 function setPt(e){const r=cv.getBoundingClientRect();const px=(e.clientX-r.left)/r.width*W,py=(e.clientY-r.top)/r.height*H;
-  pt={x:Math.max(-2,Math.min(2,Math.round(iX(px)*20)/20)),y:Math.max(-2,Math.min(2,Math.round(iY(py)*20)/20))};draw();}
-cv.addEventListener('pointerdown',e=>{if(mode!=='b')return;drag=true;cv.setPointerCapture(e.pointerId);setPt(e);});
+  const q={x:Math.max(-2,Math.min(2,Math.round(iX(px)*20)/20)),y:Math.max(-2,Math.min(2,Math.round(iY(py)*20)/20))};if(mode==='p')ppt=q;else pt=q;draw();}
+cv.addEventListener('pointerdown',e=>{if(mode!=='b'&&mode!=='p')return;drag=true;cv.setPointerCapture(e.pointerId);setPt(e);});
 cv.addEventListener('pointermove',e=>{if(drag)setPt(e);});
 cv.addEventListener('pointerup',()=>drag=false);
 $('b_reset').onclick=()=>{pt={x:1,y:1};draw();};
 
 function setMode(m){mode=m;
-  [['b','tb'],['c','tc'],['d','td']].forEach(([k,id])=>$(id).setAttribute('aria-pressed',k===m));
+  [['b','tb'],['c','tc'],['d','td'],['p','tp']].forEach(([k,id])=>$(id).setAttribute('aria-pressed',k===m));
   document.querySelectorAll('[data-show]').forEach(el=>el.classList.toggle('hide',el.dataset.show!==m));
-  cv.style.cursor=m==='b'?'crosshair':'default';
+  cv.style.cursor=(m==='b'||m==='p')?'crosshair':'default';
   draw();}
-$('tb').onclick=()=>setMode('b');$('tc').onclick=()=>setMode('c');$('td').onclick=()=>setMode('d');
+$('tb').onclick=()=>setMode('b');$('tp').onclick=()=>setMode('p');
+['pP','pQ','pf'].forEach(id=>$(id).addEventListener('input',setCustom));$('p_circ').onchange=draw;
+$('exG').onclick=e=>{e.preventDefault();$('pP').value='-y';$('pQ').value='x';$('pf').value='';setCustom();};
+$('exR').onclick=e=>{e.preventDefault();$('pP').value='x';$('pQ').value='y';$('pf').value='(x^2+y^2)/2';setCustom();};$('tc').onclick=()=>setMode('c');$('td').onclick=()=>setMode('d');
 function seg(a,b,on){$(a).setAttribute('aria-pressed',on);$(b).setAttribute('aria-pressed',!on);}
 $('dF').onclick=()=>{dField='F';seg('dF','dG',true);draw();};
 $('dG').onclick=()=>{dField='G';seg('dF','dG',false);draw();};
@@ -258,8 +325,8 @@ $('dCirc').onclick=()=>{dWhat='circ';seg('dCirc','dPath',true);draw();};
 $('dPath').onclick=()=>{dWhat='path';seg('dCirc','dPath',false);draw();};
 
 function fromHash(){const h=location.hash.replace('#','');
-  if(h==='campo-g'||h==='inciso-c')setMode('c'); else if(h==='inciso-d')setMode('d'); else setMode('b');}
-window.addEventListener('hashchange',fromHash);fromHash();
+  if(h==='campo-g'||h==='inciso-c')setMode('c'); else if(h==='inciso-d')setMode('d'); else if(h==='personalizado')setMode('p'); else setMode('b');}
+window.addEventListener('hashchange',fromHash);setCustom();fromHash();
 })();
 </script>
 </body>
