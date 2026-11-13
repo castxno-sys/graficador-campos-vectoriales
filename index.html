@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Graficador de campos vectoriales — Problema 3</title>
+<title>Graficadora — Problema 3: campos vectoriales y gradientes</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=STIX+Two+Text:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root{--ink:#0F1B2D;--muted:#5B6778;--bg:#F3F5F9;--card:#fff;--blue:#1D5BBF;--orange:#C2410C;--line:#D5DBE2;--soft-b:#E8F0FC;--soft-o:#FDEFE6}
@@ -13,117 +13,110 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,
 header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:14px}
 h1{font-size:24px;margin:0}
 .sub{color:var(--muted);font-size:14px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button{flex:1 1 180px;min-height:48px;border:2px solid var(--line);background:#fff;border-radius:12px;font:600 15px Inter,sans-serif;color:var(--ink);cursor:pointer;padding:8px 12px;text-align:left}
+.tabs button small{display:block;font-weight:500;color:var(--muted);font-size:12px;margin-top:2px}
+.tabs button[aria-pressed=true]{border-color:var(--ink);background:var(--ink);color:#fff}
+.tabs button[aria-pressed=true] small{color:#C9D3E0}
 .layout{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
 .plot{flex:1 1 560px;min-width:0;background:var(--card);border-radius:14px;padding:12px;box-shadow:0 2px 10px rgba(15,27,45,.08)}
-canvas{width:100%;height:auto;display:block;touch-action:none;cursor:crosshair;border-radius:8px}
+canvas{width:100%;height:auto;display:block;touch-action:none;border-radius:8px}
 .hint{font-size:13px;color:var(--muted);margin:8px 4px 2px}
 .side{flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:14px}
 .card{background:var(--card);border-radius:14px;padding:16px 18px;box-shadow:0 2px 10px rgba(15,27,45,.08)}
 .label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
-.tabs{display:flex;gap:8px;flex-wrap:wrap}
-.tabs button{flex:1 1 auto;min-height:44px;border:2px solid var(--line);background:#fff;border-radius:10px;font:600 15px Inter,sans-serif;color:var(--ink);cursor:pointer;padding:6px 12px}
-.tabs button[aria-pressed=true]{border-color:var(--ink);background:var(--ink);color:#fff}
+.label.o{color:var(--orange)}
 .math{font-family:'STIX Two Text',serif;font-size:19px}
 .row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #EEF1F5;font-size:15px}
 .row:last-child{border-bottom:0}
 .row span:first-child{color:var(--muted)}
-.verdict{margin-top:10px;padding:10px 12px;border-radius:10px;font-weight:600;font-size:15px}
+.verdict{margin-top:10px;padding:10px 12px;border-radius:10px;font-weight:600;font-size:15px;line-height:1.4}
 .ok{background:var(--soft-b);color:var(--blue)}
 .no{background:var(--soft-o);color:var(--orange)}
-.checks{display:flex;flex-direction:column;gap:8px;font-size:15px}
-.checks label{display:flex;gap:10px;align-items:center;min-height:32px;cursor:pointer}
-.checks input{width:20px;height:20px}
-.slider{display:flex;align-items:center;gap:10px;font-size:15px;margin-top:6px}
-.slider input{flex:1}
-.custom{display:none;gap:8px;flex-direction:column;margin-top:12px}
-.custom.on{display:flex}
-.custom label{font-size:13px;color:var(--muted)}
-.custom input{font:16px 'STIX Two Text',serif;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;width:100%}
-.err{color:var(--orange);font-size:13px;min-height:16px}
+.seg{display:flex;gap:8px;margin-top:4px}
+.seg button{flex:1;min-height:44px;border:2px solid var(--line);background:#fff;border-radius:10px;font:600 15px Inter,sans-serif;cursor:pointer;color:var(--ink)}
+.seg button[aria-pressed=true]{border-color:var(--ink);background:var(--ink);color:#fff}
 .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);margin:8px 4px 0}
 .sw{display:inline-block;width:14px;height:4px;border-radius:2px;vertical-align:middle;margin-right:6px}
-.small{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.45}
-.figs{margin-top:18px}
-.figs h2{font-size:20px;margin:0 0 4px}
-.figgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:12px}
-.figgrid figure{margin:0;background:#fff;border-radius:14px;padding:12px;box-shadow:0 2px 10px rgba(15,27,45,.08)}
-.figgrid img{width:100%;height:auto;display:block;border-radius:8px}
-.figgrid figcaption{font-size:14px;color:var(--muted);margin-top:8px;line-height:1.45}
-.figgrid figcaption b{color:var(--ink)}
+.steps{margin:0;padding-left:20px;font-size:15px;line-height:1.55}
+.steps li{margin-bottom:4px}
+.hide{display:none}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <h1>Graficador de campos vectoriales</h1>
-  <span class="sub">Problema 3 · Cálculo Vectorial · La Salle · Pareja 3</span>
+  <h1>Graficadora · Problema 3</h1>
+  <span class="sub">Cálculo Vectorial · La Salle · Pareja 3 · Dominio de la gráfica: [−2, 2] × [−2, 2]</span>
 </header>
+
+<div class="tabs" role="group" aria-label="Elegir inciso">
+  <button id="tb" aria-pressed="true">Inciso (b)<small>F = ∇f y la curva f = 0</small></button>
+  <button id="tc" aria-pressed="false">Inciso (c)<small>G = ⟨−y, x⟩</small></button>
+  <button id="td" aria-pressed="false">Inciso (d)<small>Conservativo vs no conservativo</small></button>
+</div>
+
 <div class="layout">
   <div class="plot">
-    <canvas id="cv" width="900" height="900" role="img" aria-label="Gráfica del campo vectorial seleccionado"></canvas>
-    <p class="hint">Arrastra el punto naranja (o haz clic) para mover el punto de evaluación.</p>
-    <div class="legend">
-      <span><i class="sw" style="background:#1D5BBF"></i>flechas del campo (dirección; más oscuro = más grande)</span>
-      <span><i class="sw" style="background:#C2410C"></i>vector en el punto</span>
-      <span><i class="sw" style="background:#0F1B2D"></i>curva de nivel f = 0</span>
-      <span><i class="sw" style="background:#7C3AED"></i>tangente / camino</span>
-    </div>
+    <canvas id="cv" width="900" height="900" role="img" aria-label="Gráfica del inciso seleccionado"></canvas>
+    <p class="hint" id="hint"></p>
+    <div class="legend" id="legend"></div>
   </div>
+
   <div class="side">
-    <div class="card">
-      <div class="label">Campo</div>
-      <div class="tabs" role="group" aria-label="Elegir campo">
-        <button id="tF" aria-pressed="true">F = ∇f</button>
-        <button id="tG" aria-pressed="false">G = ⟨−y, x⟩</button>
-        <button id="tC" aria-pressed="false">Personalizado</button>
+    <div class="card" data-show="b">
+      <div class="label">Inciso (b) · en el punto</div>
+      <div class="math" style="margin-bottom:8px"><b>F</b>(<i>x</i>,<i>y</i>) = ⟨2<i>xy</i>, <i>x</i>² − 3<i>y</i>²⟩ = ∇<i>f</i>, &nbsp;<i>f</i> = <i>x</i>²<i>y</i> − <i>y</i>³</div>
+      <div class="row"><span>Punto</span><b class="math" id="b_pt"></b></div>
+      <div class="row"><span>F en el punto</span><b class="math" id="b_F"></b></div>
+      <div class="row"><span>Tangente a la curva de nivel</span><b class="math" id="b_T"></b></div>
+      <div class="row"><span>F · tangente</span><b class="math" id="b_dot"></b></div>
+      <div class="verdict ok">Producto punto 0 ⇒ F ⊥ curva de nivel (90°)</div>
+      <div class="seg" style="margin-top:12px"><button id="b_reset">Volver al punto (1, 1)</button></div>
+    </div>
+    <div class="card" data-show="b">
+      <div class="label">Curva f = 0</div>
+      <ol class="steps">
+        <li><i>x</i>²<i>y</i> − <i>y</i>³ = 0</li>
+        <li><i>y</i>(<i>x</i> − <i>y</i>)(<i>x</i> + <i>y</i>) = 0</li>
+        <li>Tres rectas: <i>y</i> = 0, <i>y</i> = <i>x</i>, <i>y</i> = −<i>x</i> (líneas negras)</li>
+        <li>Por (1, 1) pasa <b><i>y</i> = <i>x</i></b></li>
+      </ol>
+    </div>
+
+    <div class="card hide" data-show="c">
+      <div class="label o">Inciso (c) · ¿es gradiente?</div>
+      <div class="math" style="margin-bottom:8px"><b>G</b>(<i>x</i>,<i>y</i>) = ⟨−<i>y</i>, <i>x</i>⟩, &nbsp;<i>P</i> = −<i>y</i>, <i>Q</i> = <i>x</i></div>
+      <div class="row"><span>∂P/∂y</span><b class="math">−1</b></div>
+      <div class="row"><span>∂Q/∂x</span><b class="math">1</b></div>
+      <div class="verdict no">−1 ≠ 1 ⇒ G NO es un gradiente</div>
+    </div>
+    <div class="card hide" data-show="c">
+      <div class="label o">Probando puntos (flechas naranjas)</div>
+      <div class="row"><span>G(1, 0)</span><b class="math">⟨0, 1⟩ ↑</b></div>
+      <div class="row"><span>G(0, 1)</span><b class="math">⟨−1, 0⟩ ←</b></div>
+      <div class="row"><span>G(−1, 0)</span><b class="math">⟨0, −1⟩ ↓</b></div>
+      <div class="row"><span>G(0, −1)</span><b class="math">⟨1, 0⟩ →</b></div>
+      <div class="verdict no">Gira en sentido antihorario y su tamaño es |G| = r</div>
+    </div>
+
+    <div class="card hide" data-show="d">
+      <div class="label">Inciso (d) · campo</div>
+      <div class="seg" role="group" aria-label="Campo del inciso d">
+        <button id="dF" aria-pressed="true">F = ∇f</button>
+        <button id="dG" aria-pressed="false">G = ⟨−y, x⟩</button>
       </div>
-      <div class="math" id="formula" style="margin-top:12px"></div>
-      <div class="custom" id="custom">
-        <label for="inP">P(x, y)</label><input id="inP" value="2*x*y">
-        <label for="inQ">Q(x, y)</label><input id="inQ" value="x^2 - 3*y^2">
-        <label for="inF">f(x, y) para curvas de nivel (opcional)</label><input id="inF" value="x^2*y - y^3">
-        <div class="err" id="err"></div>
+      <div class="seg" role="group" aria-label="Qué calcular" style="margin-top:8px">
+        <button id="dCirc" aria-pressed="true">Vuelta completa</button>
+        <button id="dPath" aria-pressed="false">Arriba vs abajo</button>
       </div>
     </div>
-    <div class="card">
-      <div class="label">En el punto</div>
-      <div class="row"><span>Punto</span><b class="math" id="pt"></b></div>
-      <div class="row"><span>Vector del campo</span><b class="math" id="vec"></b></div>
-      <div class="row"><span>Magnitud</span><b class="math" id="mag"></b></div>
-      <div class="row" id="rowT"><span>Tangente a la curva de nivel</span><b class="math" id="tan"></b></div>
-      <div class="row" id="rowD"><span>Vector · tangente</span><b class="math" id="dot"></b></div>
-    </div>
-    <div class="card">
-      <div class="label">¿Es un gradiente? (Clairaut)</div>
-      <div class="row"><span>∂P/∂y en el punto</span><b class="math" id="py"></b></div>
-      <div class="row"><span>∂Q/∂x en el punto</span><b class="math" id="qx"></b></div>
-      <div class="verdict" id="verd"></div>
-    </div>
-    <div class="card">
-      <div class="label">Mostrar</div>
-      <div class="checks">
-        <label><input type="checkbox" id="cLevel" checked> Curvas de nivel de f</label>
-        <label><input type="checkbox" id="cTan" checked> Tangente en el punto</label>
-        <label><input type="checkbox" id="cCirc"> Circulación en un círculo de radio r</label>
-        <label><input type="checkbox" id="cPath"> Caminos de (r,0) a (−r,0): arriba vs abajo</label>
-      </div>
-      <div class="slider"><span>r =</span><input type="range" id="rad" min="0.3" max="2" step="0.05" value="1" aria-label="Radio r"><b id="rv">1.00</b></div>
-      <div id="circOut"></div>
+    <div class="card hide" data-show="d">
+      <div class="label" id="d_lab">Trabajo</div>
+      <div id="d_out"></div>
     </div>
   </div>
 </div>
-<section class="figs" aria-labelledby="figs-title">
-  <h2 id="figs-title">Gráficas del ejercicio</h2>
-  <p class="sub">Hechas con Python y Matplotlib. Dominio de la gráfica: [−2, 2] × [−2, 2].</p>
-  <div class="figgrid">
-    <figure><img src="fig1_gradiente_F.png" alt="Campo F = ∇f con las curvas de nivel de f, la curva f = 0 y el vector F(1,1) perpendicular a la recta y = x">
-      <figcaption><b>Inciso (b).</b> F = ∇f = ⟨2xy, x² − 3y²⟩ con las curvas de nivel de f. Las líneas negras son f = 0; la flecha naranja F(1,1) = ⟨2, −2⟩ es perpendicular a la recta y = x.</figcaption></figure>
-    <figure><img src="fig2_campo_G.png" alt="Campo G = ⟨−y, x⟩ girando en sentido antihorario alrededor del origen">
-      <figcaption><b>Inciso (c).</b> G = ⟨−y, x⟩ gira en sentido antihorario y su tamaño es r. No es un gradiente: ∂P/∂y = −1 ≠ 1 = ∂Q/∂x.</figcaption></figure>
-    <figure><img src="fig3_circulacion.png" alt="Circulación de F y de G sobre la circunferencia unitaria">
-      <figcaption><b>Inciso (d).</b> Trabajo en la circunferencia x² + y² = 1: 0 para F (conservativo) y 2π para G (no conservativo).</figcaption></figure>
-  </div>
-</section>
 </div>
 <script>
 (function(){
@@ -131,28 +124,13 @@ const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 const W=cv.width,H=cv.height,L=2.2;
 const X=x=>(x+L)/(2*L)*W, Y=y=>H-(y+L)/(2*L)*H;
 const iX=px=>px/W*2*L-L, iY=py=>(H-py)/H*2*L-L;
-let mode='F', P0={x:1,y:1};
-const fields={
-  F:{P:(x,y)=>2*x*y,Q:(x,y)=>x*x-3*y*y,f:(x,y)=>x*x*y-y*y*y,html:'<b>F</b>(<i>x</i>,<i>y</i>) = ⟨2<i>xy</i>, <i>x</i>² − 3<i>y</i>²⟩ = ∇<i>f</i>, &nbsp;<i>f</i> = <i>x</i>²<i>y</i> − <i>y</i>³'},
-  G:{P:(x,y)=>-y,Q:(x,y)=>x,f:null,html:'<b>G</b>(<i>x</i>,<i>y</i>) = ⟨−<i>y</i>, <i>x</i>⟩'},
-  C:{P:null,Q:null,f:null,html:'Escribe P, Q (y opcionalmente f). Usa ^, sin, cos, exp, sqrt, pi.'}
-};
-function compile(s){
-  const e=s.replace(/\^/g,'**').replace(/\bsen\b/g,'sin');
-  if(/[^0-9x y+\-*/().,a-z_]/i.test(e))throw new Error('Carácter no válido');
-  const fn=new Function('x','y','with(Math){return ('+e+');}');
-  const t=fn(0.3,0.7); if(typeof t!=='number')throw new Error('No da un número');
-  return fn;
-}
-function setCustom(){
-  const err=document.getElementById('err');
-  try{
-    fields.C.P=compile(inP.value); fields.C.Q=compile(inQ.value);
-    fields.C.f=inF.value.trim()?compile(inF.value):null; err.textContent='';
-  }catch(e){err.textContent='Revisa la expresión: '+e.message;}
-  draw();
-}
-const fmt=v=>{if(!isFinite(v))return '—';const r=Math.abs(v)<5e-4?0:v;return (Math.round(r*1000)/1000).toString().replace('-','−');};
+const $=id=>document.getElementById(id);
+const F={P:(x,y)=>2*x*y,Q:(x,y)=>x*x-3*y*y,f:(x,y)=>x*x*y-y*y*y};
+const G={P:(x,y)=>-y,Q:(x,y)=>x};
+let mode='b', pt={x:1,y:1}, dField='F', dWhat='circ';
+const BLUE='#1D5BBF',ORANGE='#C2410C',PURPLE='#7C3AED',TEAL='#0F766E',INK='#0F1B2D';
+const fmt=v=>{const r=Math.abs(v)<5e-4?0:v;return (Math.round(r*1000)/1000).toString().replace('-','−');};
+
 function arrow(x0,y0,x1,y1,col,w,head){
   ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();
   const a=Math.atan2(y1-y0,x1-x0);ctx.beginPath();ctx.moveTo(x1,y1);
@@ -161,100 +139,126 @@ function arrow(x0,y0,x1,y1,col,w,head){
 function contour(f,level,col,w,dash){
   const n=120,h=2*L/n;ctx.strokeStyle=col;ctx.lineWidth=w;ctx.setLineDash(dash||[]);ctx.beginPath();
   const v=[];for(let i=0;i<=n;i++){v[i]=[];for(let j=0;j<=n;j++)v[i][j]=f(-L+i*h,-L+j*h)-level;}
-  const lerp=(a,b)=>a/(a-b);
+  const lp=(a,b)=>a/(a-b);
   for(let i=0;i<n;i++)for(let j=0;j<n;j++){
-    const a=v[i][j],b=v[i+1][j],c=v[i+1][j+1],d=v[i][j+1],x=-L+i*h,y=-L+j*h,pts=[];
-    if((a>0)!==(b>0))pts.push([x+h*lerp(a,b),y]);
-    if((b>0)!==(c>0))pts.push([x+h,y+h*lerp(b,c)]);
-    if((c>0)!==(d>0))pts.push([x+h*(1-lerp(c,d)),y+h]);
-    if((d>0)!==(a>0))pts.push([x,y+h*(1-lerp(d,a))]);
-    for(let k=0;k+1<pts.length;k+=2){ctx.moveTo(X(pts[k][0]),Y(pts[k][1]));ctx.lineTo(X(pts[k+1][0]),Y(pts[k+1][1]));}
+    const a=v[i][j],b=v[i+1][j],c=v[i+1][j+1],d=v[i][j+1],x=-L+i*h,y=-L+j*h,p=[];
+    if((a>0)!==(b>0))p.push([x+h*lp(a,b),y]);
+    if((b>0)!==(c>0))p.push([x+h,y+h*lp(b,c)]);
+    if((c>0)!==(d>0))p.push([x+h*(1-lp(c,d)),y+h]);
+    if((d>0)!==(a>0))p.push([x,y+h*(1-lp(d,a))]);
+    for(let k=0;k+1<p.length;k+=2){ctx.moveTo(X(p[k][0]),Y(p[k][1]));ctx.lineTo(X(p[k+1][0]),Y(p[k+1][1]));}
   }
   ctx.stroke();ctx.setLineDash([]);
 }
-function lineInt(Fd,path,t0,t1,n=4000){
-  let s=0;const h=(t1-t0)/n;
-  for(let k=0;k<n;k++){const t=t0+(k+.5)*h,[x,y,dx,dy]=path(t);s+=(Fd.P(x,y)*dx+Fd.Q(x,y)*dy)*h;}return s;
-}
-function draw(){
-  const Fd=fields[mode];ctx.clearRect(0,0,W,H);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
-  // grid
+function base(){
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
   ctx.strokeStyle='#EEF1F5';ctx.lineWidth=1;
   for(let k=-2;k<=2;k+=0.5){ctx.beginPath();ctx.moveTo(X(k),0);ctx.lineTo(X(k),H);ctx.moveTo(0,Y(k));ctx.lineTo(W,Y(k));ctx.stroke();}
   ctx.strokeStyle='#9AA3AD';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(X(0),0);ctx.lineTo(X(0),H);ctx.moveTo(0,Y(0));ctx.lineTo(W,Y(0));ctx.stroke();
   ctx.fillStyle='#5B6778';ctx.font='20px Inter';
   for(let k=-2;k<=2;k++){if(k){ctx.fillText(k,X(k)-6,Y(0)+24);ctx.fillText(k,X(0)+8,Y(k)+6);}}
   ctx.fillText('x',W-22,Y(0)-10);ctx.fillText('y',X(0)+10,22);
-  // dominio [-2,2]x[-2,2]
-  ctx.setLineDash([10,6]);ctx.strokeStyle='#0F1B2D';ctx.lineWidth=2;ctx.strokeRect(X(-2),Y(2),X(2)-X(-2),Y(-2)-Y(2));ctx.setLineDash([]);
-  if(!Fd.P)return;
-  // level curves
-  if(Fd.f&&cLevel.checked){
-    for(let lv=-6;lv<=6;lv+=1.5){if(lv!==0)contour(Fd.f,lv,'#B8C1CC',1.5,lv<0?[6,5]:[]);}
-    contour(Fd.f,0,'#0F1B2D',3.5);
-  }
-  // arrows
-  const n=17,step=4/(n-1);let mx=0;const A=[];
-  for(let i=0;i<n;i++)for(let j=0;j<n;j++){const x=-2+i*step,y=-2+j*step,u=Fd.P(x,y),v=Fd.Q(x,y),m=Math.hypot(u,v);if(isFinite(m)){A.push([x,y,u,v,m]);mx=Math.max(mx,m);}}
-  A.forEach(([x,y,u,v,m])=>{if(m<1e-9)return;const len=0.17,ux=u/m*len,uy=v/m*len,t=0.25+0.75*m/(mx||1);
-    const c=`rgba(29,91,191,${t.toFixed(2)})`;arrow(X(x-ux/2),Y(y-uy/2),X(x+ux/2),Y(y+uy/2),c,2.2,9);});
-  // circulation / paths
-  const r=+rad.value;rv.textContent=r.toFixed(2);let out='';
-  if(cCirc.checked){
-    ctx.strokeStyle='#7C3AED';ctx.lineWidth=3.5;ctx.beginPath();ctx.arc(X(0),Y(0),r/(2*L)*W,0,2*Math.PI);ctx.stroke();
-    const a=0.6;arrow(X(r*Math.cos(a)),Y(r*Math.sin(a)),X(r*Math.cos(a+0.15)),Y(r*Math.sin(a+0.15)),'#7C3AED',3.5,16);
-    const c=lineInt(Fd,t=>[r*Math.cos(t),r*Math.sin(t),-r*Math.sin(t),r*Math.cos(t)],0,2*Math.PI);
-    out+=`<div class="row"><span>∮ campo · d<b>r</b> (antihorario)</span><b class="math">${fmt(c)}</b></div>`;
-    if(mode==='G')out+=`<p class="small">Exacto: 2π r² = ${fmt(2*Math.PI*r*r)}. Para r = 1 da 2π ≈ 6.283.</p>`;
-    if(mode==='F')out+=`<p class="small">Da 0 para cualquier r: <b>F</b> es conservativo.</p>`;
-  }
-  if(cPath.checked){
-    ctx.lineWidth=3.5;ctx.setLineDash([12,8]);
-    ctx.strokeStyle='#7C3AED';ctx.beginPath();ctx.arc(X(0),Y(0),r/(2*L)*W,Math.PI,2*Math.PI);ctx.stroke();
-    ctx.strokeStyle='#0F766E';ctx.beginPath();ctx.arc(X(0),Y(0),r/(2*L)*W,0,Math.PI);ctx.stroke();ctx.setLineDash([]);
-    const up=lineInt(Fd,t=>[r*Math.cos(t),r*Math.sin(t),-r*Math.sin(t),r*Math.cos(t)],0,Math.PI);
-    const dn=lineInt(Fd,t=>[r*Math.cos(t),-r*Math.sin(t),-r*Math.sin(t),-r*Math.cos(t)],0,Math.PI);
-    out+=`<div class="row"><span style="color:#7C3AED">Camino de arriba</span><b class="math">${fmt(up)}</b></div>
-          <div class="row"><span style="color:#0F766E">Camino de abajo</span><b class="math">${fmt(dn)}</b></div>
-          <p class="small">${Math.abs(up-dn)<1e-3?'Iguales: el trabajo <b>no depende del camino</b>.':'Distintos: el trabajo <b>depende del camino</b> → no conservativo.'}</p>`;
-  }
-  circOut.innerHTML=out;
-  // point
-  const {x,y}=P0,u=Fd.P(x,y),v=Fd.Q(x,y),m=Math.hypot(u,v);
-  const sc=0.35/Math.max(1,m)*Math.min(m,4);
-  if(Fd.f&&cTan.checked&&m>1e-9){const tx=-v/m,ty=u/m;ctx.setLineDash([10,7]);ctx.strokeStyle='#7C3AED';ctx.lineWidth=3;
-    ctx.beginPath();ctx.moveTo(X(x-0.8*tx),Y(y-0.8*ty));ctx.lineTo(X(x+0.8*tx),Y(y+0.8*ty));ctx.stroke();ctx.setLineDash([]);}
-  if(m>1e-9){const k=0.6/m*Math.min(1.3,Math.max(0.6,m/2));arrow(X(x),Y(y),X(x+u*k),Y(y+v*k),'#C2410C',5,20);}
-  ctx.fillStyle='#C2410C';ctx.beginPath();ctx.arc(X(x),Y(y),11,0,2*Math.PI);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.stroke();
-  {ctx.font='600 20px Inter';const lbl='Dominio: [−2, 2] × [−2, 2]';const tw=ctx.measureText(lbl).width;
-  ctx.fillStyle='rgba(255,255,255,.92)';ctx.fillRect(X(-2)+8,Y(2)+8,tw+16,32);ctx.fillStyle='#0F1B2D';ctx.fillText(lbl,X(-2)+16,Y(2)+31);}
-  // readouts
-  pt.textContent=`(${fmt(x)}, ${fmt(y)})`;vec.textContent=`⟨${fmt(u)}, ${fmt(v)}⟩`;mag.textContent=fmt(m);
-  const hasF=!!Fd.f;rowT.style.display=rowD.style.display=hasF?'':'none';
-  const g=m>1e-9?[-v/m,u/m]:[0,0];
-  tan.textContent=m>1e-9?`⟨${fmt(g[0])}, ${fmt(g[1])}⟩`:'—';
-  dot.textContent=m>1e-9?fmt(u*g[0]+v*g[1])+'  (⊥)':'—';
-  const h=1e-4,py_=(Fd.P(x,y+h)-Fd.P(x,y-h))/(2*h),qx_=(Fd.Q(x+h,y)-Fd.Q(x-h,y))/(2*h);
-  py.textContent=fmt(py_);qx.textContent=fmt(qx_);
-  const same=Math.abs(py_-qx_)<1e-3;
-  verd.className='verdict '+(same?'ok':'no');
-  verd.textContent=same?'∂P/∂y = ∂Q/∂x → puede ser gradiente (conservativo)':'∂P/∂y ≠ ∂Q/∂x → NO es gradiente (no conservativo)';
+  ctx.setLineDash([10,6]);ctx.strokeStyle=INK;ctx.lineWidth=2;ctx.strokeRect(X(-2),Y(2),X(2)-X(-2),Y(-2)-Y(2));ctx.setLineDash([]);
 }
-// interaction
+function field(Fd){
+  const n=17,st=4/(n-1);let mx=0;const A=[];
+  for(let i=0;i<n;i++)for(let j=0;j<n;j++){const x=-2+i*st,y=-2+j*st,u=Fd.P(x,y),v=Fd.Q(x,y),m=Math.hypot(u,v);A.push([x,y,u,v,m]);mx=Math.max(mx,m);}
+  A.forEach(([x,y,u,v,m])=>{if(m<1e-9)return;const len=0.17,ux=u/m*len,uy=v/m*len,t=0.25+0.75*m/mx;
+    arrow(X(x-ux/2),Y(y-uy/2),X(x+ux/2),Y(y+uy/2),`rgba(29,91,191,${t.toFixed(2)})`,2.2,9);});
+}
+function domainLabel(){
+  ctx.font='600 20px Inter';const l='Dominio: [−2, 2] × [−2, 2]';const tw=ctx.measureText(l).width;
+  ctx.fillStyle='rgba(255,255,255,.92)';ctx.fillRect(X(-2)+8,Y(2)+8,tw+16,32);ctx.fillStyle=INK;ctx.fillText(l,X(-2)+16,Y(2)+31);
+}
+function lineInt(Fd,path,t0,t1,n=4000){let s=0;const h=(t1-t0)/n;for(let k=0;k<n;k++){const t=t0+(k+.5)*h,[x,y,dx,dy]=path(t);s+=(Fd.P(x,y)*dx+Fd.Q(x,y)*dy)*h;}return s;}
+function legend(items){$('legend').innerHTML=items.map(([c,t])=>`<span><i class="sw" style="background:${c}"></i>${t}</span>`).join('');}
+
+function drawB(){
+  base();
+  for(let lv=-6;lv<=6;lv+=1.5){if(lv!==0)contour(F.f,lv,'#B8C1CC',1.5,lv<0?[6,5]:[]);}
+  field(F);
+  contour(F.f,0,INK,3.5);
+  const {x,y}=pt,u=F.P(x,y),v=F.Q(x,y),m=Math.hypot(u,v);
+  if(m>1e-9){const tx=-v/m,ty=u/m;ctx.setLineDash([10,7]);ctx.strokeStyle=PURPLE;ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(X(x-0.9*tx),Y(y-0.9*ty));ctx.lineTo(X(x+0.9*tx),Y(y+0.9*ty));ctx.stroke();ctx.setLineDash([]);
+    const k=0.6/m*Math.min(1.3,Math.max(0.6,m/2));arrow(X(x),Y(y),X(x+u*k),Y(y+v*k),ORANGE,5,20);
+    $('b_T').textContent=`⟨${fmt(tx)}, ${fmt(ty)}⟩`;$('b_dot').textContent=fmt(u*tx+v*ty);
+  }else{$('b_T').textContent='—';$('b_dot').textContent='—';}
+  ctx.fillStyle=ORANGE;ctx.beginPath();ctx.arc(X(x),Y(y),11,0,2*Math.PI);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.stroke();
+  domainLabel();
+  $('b_pt').textContent=`(${fmt(x)}, ${fmt(y)})`;$('b_F').textContent=`⟨${fmt(u)}, ${fmt(v)}⟩`;
+  if(Math.abs(x-1)<1e-9&&Math.abs(y-1)<1e-9) $('b_T').textContent='⟨1, 1⟩ (recta y = x)';
+  $('hint').textContent='Empieza en (1, 1). Arrastra el punto naranja: el producto punto siempre da 0.';
+  legend([[BLUE,'flechas de F (más oscuro = más grande)'],[INK,'curva f = 0'],[ORANGE,'F en el punto'],[PURPLE,'tangente a la curva de nivel']]);
+}
+function drawC(){
+  base();
+  for(const r of [0.5,1,1.5,2]){ctx.strokeStyle='#C9D0D8';ctx.lineWidth=1.5;ctx.setLineDash([6,5]);ctx.beginPath();ctx.arc(X(0),Y(0),r/(2*L)*W,0,2*Math.PI);ctx.stroke();ctx.setLineDash([]);}
+  field(G);
+  for(const [x,y] of [[1,0],[0,1],[-1,0],[0,-1]]){const u=G.P(x,y),v=G.Q(x,y);arrow(X(x),Y(y),X(x+u*0.55),Y(y+v*0.55),ORANGE,5,20);
+    ctx.fillStyle=ORANGE;ctx.beginPath();ctx.arc(X(x),Y(y),9,0,2*Math.PI);ctx.fill();}
+  domainLabel();
+  $('hint').textContent='Las flechas naranjas son G en (1,0), (0,1), (−1,0) y (0,−1): el campo gira en sentido antihorario.';
+  legend([[BLUE,'flechas de G (más oscuro = más grande)'],[ORANGE,'G en los puntos de prueba'],['#C9D0D8','círculos centrados en el origen']]);
+}
+function drawD(){
+  base();
+  const Fd=dField==='F'?F:G;
+  field(Fd);
+  const R=1/(2*L)*W;
+  let out='';
+  if(dWhat==='circ'){
+    ctx.strokeStyle=PURPLE;ctx.lineWidth=4;ctx.beginPath();ctx.arc(X(0),Y(0),R,0,2*Math.PI);ctx.stroke();
+    arrow(X(Math.cos(0.6)),Y(Math.sin(0.6)),X(Math.cos(0.78)),Y(Math.sin(0.78)),PURPLE,4,18);
+    const c=lineInt(Fd,t=>[Math.cos(t),Math.sin(t),-Math.sin(t),Math.cos(t)],0,2*Math.PI);
+    $('d_lab').textContent='Trabajo en una vuelta: x² + y² = 1';
+    out=`<div class="row"><span>∮ ${dField} · dr (antihorario)</span><b class="math">${dField==='F'?'0':'2π ≈ '+fmt(c)}</b></div>`+
+      (dField==='F'?`<div class="verdict ok">Da 0: se vuelve al mismo punto y f(1,0) − f(1,0) = 0. F es conservativo.</div>`
+                   :`<div class="verdict no">Da 2π ≠ 0: G siempre empuja en el sentido del giro. G no es conservativo.</div>`);
+  }else{
+    ctx.lineWidth=4;ctx.setLineDash([12,8]);
+    ctx.strokeStyle=PURPLE;ctx.beginPath();ctx.arc(X(0),Y(0),R,Math.PI,2*Math.PI);ctx.stroke();
+    ctx.strokeStyle=TEAL;ctx.beginPath();ctx.arc(X(0),Y(0),R,0,Math.PI);ctx.stroke();ctx.setLineDash([]);
+    for(const [x,y] of [[1,0],[-1,0]]){ctx.fillStyle=INK;ctx.beginPath();ctx.arc(X(x),Y(y),9,0,2*Math.PI);ctx.fill();}
+    ctx.font='600 20px Inter';ctx.fillStyle=INK;ctx.fillText('(1, 0)',X(1)+12,Y(0)+28);ctx.fillText('(−1, 0)',X(-1)-80,Y(0)+28);
+    const up=lineInt(Fd,t=>[Math.cos(t),Math.sin(t),-Math.sin(t),Math.cos(t)],0,Math.PI);
+    const dn=lineInt(Fd,t=>[Math.cos(t),-Math.sin(t),-Math.sin(t),-Math.cos(t)],0,Math.PI);
+    $('d_lab').textContent='De (1, 0) a (−1, 0) por dos caminos';
+    const name=v=>dField==='F'?'0':(v>0?'π ≈ ':'−π ≈ ')+fmt(v);
+    out=`<div class="row"><span style="color:${PURPLE}">Camino de arriba</span><b class="math">${name(up)}</b></div>
+         <div class="row"><span style="color:${TEAL}">Camino de abajo</span><b class="math">${name(dn)}</b></div>`+
+      (dField==='F'?`<div class="verdict ok">Iguales: el trabajo de F no depende del camino.</div>`
+                   :`<div class="verdict no">π ≠ −π: el trabajo de G depende del camino.</div>`);
+  }
+  $('d_out').innerHTML=out;
+  domainLabel();
+  $('hint').textContent='Cambia entre F y G, y entre la vuelta completa y los dos caminos.';
+  legend(dWhat==='circ'?[[BLUE,'flechas del campo'],[PURPLE,'circunferencia x² + y² = 1']]:[[BLUE,'flechas del campo'],[PURPLE,'camino de arriba'],[TEAL,'camino de abajo']]);
+}
+function draw(){ if(mode==='b')drawB(); else if(mode==='c')drawC(); else drawD(); }
+
 let drag=false;
-function setPt(e){const r=cv.getBoundingClientRect();const px=(e.clientX-r.left)/r.width*W,py_=(e.clientY-r.top)/r.height*H;
-  P0={x:Math.max(-2,Math.min(2,Math.round(iX(px)*20)/20)),y:Math.max(-2,Math.min(2,Math.round(iY(py_)*20)/20))};draw();}
-cv.addEventListener('pointerdown',e=>{drag=true;cv.setPointerCapture(e.pointerId);setPt(e);});
+function setPt(e){const r=cv.getBoundingClientRect();const px=(e.clientX-r.left)/r.width*W,py=(e.clientY-r.top)/r.height*H;
+  pt={x:Math.max(-2,Math.min(2,Math.round(iX(px)*20)/20)),y:Math.max(-2,Math.min(2,Math.round(iY(py)*20)/20))};draw();}
+cv.addEventListener('pointerdown',e=>{if(mode!=='b')return;drag=true;cv.setPointerCapture(e.pointerId);setPt(e);});
 cv.addEventListener('pointermove',e=>{if(drag)setPt(e);});
 cv.addEventListener('pointerup',()=>drag=false);
-function setMode(m){mode=m;['F','G','C'].forEach(k=>document.getElementById('t'+k).setAttribute('aria-pressed',k===m));
-  formula.innerHTML=fields[m].html;custom.classList.toggle('on',m==='C');
-  if(m==='G'){cCirc.checked=true;} if(m==='C')setCustom(); else draw();}
-tF.onclick=()=>setMode('F');tG.onclick=()=>setMode('G');tC.onclick=()=>setMode('C');
-[cLevel,cTan,cCirc,cPath].forEach(c=>c.onchange=draw);rad.oninput=draw;
-[inP,inQ,inF].forEach(i=>i.oninput=setCustom);
-// hash routing: #campo-g opens G
-function fromHash(){const h=location.hash.replace('#','');setMode(h==='campo-g'?'G':h==='personalizado'?'C':'F');}
+$('b_reset').onclick=()=>{pt={x:1,y:1};draw();};
+
+function setMode(m){mode=m;
+  [['b','tb'],['c','tc'],['d','td']].forEach(([k,id])=>$(id).setAttribute('aria-pressed',k===m));
+  document.querySelectorAll('[data-show]').forEach(el=>el.classList.toggle('hide',el.dataset.show!==m));
+  cv.style.cursor=m==='b'?'crosshair':'default';
+  draw();}
+$('tb').onclick=()=>setMode('b');$('tc').onclick=()=>setMode('c');$('td').onclick=()=>setMode('d');
+function seg(a,b,on){$(a).setAttribute('aria-pressed',on);$(b).setAttribute('aria-pressed',!on);}
+$('dF').onclick=()=>{dField='F';seg('dF','dG',true);draw();};
+$('dG').onclick=()=>{dField='G';seg('dF','dG',false);draw();};
+$('dCirc').onclick=()=>{dWhat='circ';seg('dCirc','dPath',true);draw();};
+$('dPath').onclick=()=>{dWhat='path';seg('dCirc','dPath',false);draw();};
+
+function fromHash(){const h=location.hash.replace('#','');
+  if(h==='campo-g'||h==='inciso-c')setMode('c'); else if(h==='inciso-d')setMode('d'); else setMode('b');}
 window.addEventListener('hashchange',fromHash);fromHash();
 })();
 </script>
