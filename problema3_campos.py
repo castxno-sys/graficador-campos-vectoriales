@@ -63,7 +63,7 @@ ax.text(1.95, 0.30, "F(1,1) = ⟨2, −2⟩", color=NARANJA, fontsize=12, ha="ri
 ax.text(1.95, 1.72, "tangente ⟨1, 1⟩", color=AZUL, fontsize=11, ha="right",
         bbox=dict(fc="white", ec="none", alpha=0.85))
 ax.set(xlim=(-2, 2), ylim=(-2, 2), aspect="equal", xlabel="x", ylabel="y",
-       title="F = ∇f = ⟨2xy, x² − 3y²⟩  y curvas de nivel de f")
+       title="F = ∇f = ⟨2xy, x² − 3y²⟩  y curvas de nivel de f\nDominio: [−2, 2] × [−2, 2]")
 ax.legend(loc="lower left")
 fig.tight_layout()
 fig.savefig("fig1_gradiente_F.png", dpi=180)
@@ -80,8 +80,8 @@ for r in (0.5, 1, 1.5, 2):
 q = ax.quiver(X, Y, U2, V2, M2, cmap="Oranges", scale=40, width=0.004)
 fig.colorbar(q, ax=ax, shrink=0.75, label="|G| = r")
 ax.plot(0, 0, "o", color=TINTA)
-ax.set(xlim=(-2.2, 2.2), ylim=(-2.2, 2.2), aspect="equal", xlabel="x",
-       ylabel="y", title="G = ⟨−y, x⟩: rotación antihoraria, |G| = r")
+ax.set(xlim=(-2, 2), ylim=(-2, 2), aspect="equal", xlabel="x",
+       ylabel="y", title="G = ⟨−y, x⟩: rotación antihoraria, |G| = r\nDominio: [−2, 2] × [−2, 2]")
 fig.tight_layout()
 fig.savefig("fig2_campo_G.png", dpi=180)
 
